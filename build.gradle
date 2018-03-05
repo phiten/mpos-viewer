@@ -1,45 +1,49 @@
 buildscript {
     repositories {
         mavenCentral()
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.8.+'
+        classpath 'com.android.tools.build:gradle:3.0.1'
+
     }
 }
 
 repositories {
     mavenCentral()
+    google()
 }
 
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion '19.0.1'
+    compileSdkVersion 27
+    buildToolsVersion "26.0.3"
+    useLibrary 'org.apache.http.legacy'
+
 
     // signing
-    def keyStore = System.getenv('KEY_STORE');
-    if(keyStore != null) {
-        signingConfigs {
-            release {
-                storeFile file(keyStore)
-                storePassword System.getenv('KEY_STORE_PASSWORD')
-                keyAlias System.getenv('KEY_ALIAS')
-                keyPassword System.getenv('KEY_ALIAS_PASSWORD')
-            }
-        }
+    defaultConfig {
+        applicationId "com.megalist"
+        minSdkVersion 19
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
 
-        buildTypes {
-            release {
-                signingConfig signingConfigs.release
-            }
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
 }
 
 dependencies {
-    compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
-    compile 'com.android.support:support-v4:+'
-    compile 'com.google.zxing:android-integration:2.3.0+'
-    compile 'com.google.code.gson:gson:2.2.4+'
+    compile 'com.android.support:appcompat-v7:27.1.0'
+    compile 'com.android.support:support-v4:27.1.0'
+    compile 'com.google.zxing:android-integration:2.3.0'
+    compile 'com.google.code.gson:gson:2.8.2'
 }
