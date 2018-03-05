@@ -1,21 +1,28 @@
 package net.taviscaron.mposviewer.activity;
 
+import android.app.ActionBar;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.*;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.Toast;
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
+
 import net.taviscaron.mposviewer.R;
 import net.taviscaron.mposviewer.core.Constants;
-import net.taviscaron.mposviewer.fragments.*;
+import net.taviscaron.mposviewer.fragments.DashboardFragment;
+import net.taviscaron.mposviewer.fragments.GeneralStatsFragment;
+import net.taviscaron.mposviewer.fragments.ProgressDialogFragment;
+import net.taviscaron.mposviewer.fragments.RPCDataPresenterFragment;
+import net.taviscaron.mposviewer.fragments.WorkersFragment;
 import net.taviscaron.mposviewer.model.Account;
 import net.taviscaron.mposviewer.storage.DBHelper;
 
@@ -23,7 +30,7 @@ import net.taviscaron.mposviewer.storage.DBHelper;
  * Shows MPOS account information
  * @author Andrei Senchuk
  */
-public class AccountViewActivity extends SherlockFragmentActivity implements RPCDataPresenterFragment.RPCDataAccountProvider, RPCDataPresenterFragment.RPCDataSynchronousLoadCallback, RPCDataPresenterFragment.RPCDataLoadCallback {
+public class AccountViewActivity extends AppCompatActivity implements RPCDataPresenterFragment.RPCDataAccountProvider, RPCDataPresenterFragment.RPCDataSynchronousLoadCallback, RPCDataPresenterFragment.RPCDataLoadCallback {
     private static final String TAG = "AccountViewActivity";
     private static final String SYNC_LOADERS_BUNDLE_KEY = "syncLoaders";
 
@@ -46,22 +53,26 @@ public class AccountViewActivity extends SherlockFragmentActivity implements RPC
     private final ViewPager.OnPageChangeListener pageChangeListener = new ViewPager.SimpleOnPageChangeListener() {
         @Override
         public void onPageSelected(int position) {
-            getSupportActionBar().setSelectedNavigationItem(position);
+            getActionBar().setSelectedNavigationItem(position);
             invalidateOptionsMenu();
         }
     };
 
     private final ActionBar.TabListener tabListener = new ActionBar.TabListener() {
-        public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+        @Override
+        public void onTabSelected(ActionBar.Tab tab, android.app.FragmentTransaction fragmentTransaction) {
             viewPager.setCurrentItem(tab.getPosition());
+
         }
 
-        public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-            // noop
+        @Override
+        public void onTabUnselected(ActionBar.Tab tab, android.app.FragmentTransaction fragmentTransaction) {
+
         }
 
-        public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
-            // noop
+        @Override
+        public void onTabReselected(ActionBar.Tab tab, android.app.FragmentTransaction fragmentTransaction) {
+
         }
     };
 
@@ -107,7 +118,7 @@ public class AccountViewActivity extends SherlockFragmentActivity implements RPC
         });
 
         // create tabs
-        ActionBar actionBar = getSupportActionBar();
+        ActionBar actionBar = getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
         for(Page page : Page.values()) {
@@ -143,7 +154,7 @@ public class AccountViewActivity extends SherlockFragmentActivity implements RPC
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getSupportMenuInflater().inflate(R.menu.account_info, menu);
+        getMenuInflater().inflate(R.menu.account_info, menu);
 
         Fragment fragment = fragments[viewPager.getCurrentItem()];
         if(fragment instanceof RPCDataPresenterFragment) {

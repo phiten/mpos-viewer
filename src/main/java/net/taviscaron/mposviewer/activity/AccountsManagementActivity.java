@@ -6,19 +6,21 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
+
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+
 import net.taviscaron.mposviewer.R;
 import net.taviscaron.mposviewer.core.Constants;
 import net.taviscaron.mposviewer.fragments.AccountAddFragment;
@@ -32,10 +34,11 @@ import java.util.regex.Pattern;
 
 /**
  * Accounts / pool management activity
+ *
  * @author Andrei Senchuk
  */
-public class AccountsManagementActivity extends SherlockFragmentActivity implements AccountAddFragment.AccountAddFragmentListener {
-    private static final String TAG = "AccountsManagementActivity";
+public class AccountsManagementActivity extends FragmentActivity implements AccountAddFragment.AccountAddFragmentListener {
+    private static final String TAG = "AccountsManagement";
     private static final String ACCOUNT_ADD_FRAGMENT_TAG = "accountAddFragment";
     private static final String PROGRESS_DIALOG_FRAGMENT_TAG = "progressDialogFragment";
 
@@ -50,15 +53,15 @@ public class AccountsManagementActivity extends SherlockFragmentActivity impleme
         setContentView(R.layout.accounts_management);
 
         // map user name to main title and pool name to subtitle of the simple_list_item_2
-        listAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_2, null, new String[] {
+        listAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_2, null, new String[]{
                 Account.USER_NAME_ATTR,
                 Account.POOL_NAME_ATTR
-        }, new int[] {
+        }, new int[]{
                 android.R.id.text1,
                 android.R.id.text2
         }, 0);
 
-        ListView listView = (ListView)findViewById(R.id.accounts_management_list);
+        ListView listView = (ListView) findViewById(R.id.accounts_management_list);
         listView.setAdapter(listAdapter);
         registerForContextMenu(listView);
 
@@ -78,7 +81,7 @@ public class AccountsManagementActivity extends SherlockFragmentActivity impleme
 
         // get the fragment (it's not null in case retained instance exists)
         FragmentManager fm = getSupportFragmentManager();
-        fragment = (AccountAddFragment)fm.findFragmentByTag(ACCOUNT_ADD_FRAGMENT_TAG);
+        fragment = (AccountAddFragment) fm.findFragmentByTag(ACCOUNT_ADD_FRAGMENT_TAG);
 
         if (fragment == null) {
             fragment = new AccountAddFragment();
@@ -106,7 +109,7 @@ public class AccountsManagementActivity extends SherlockFragmentActivity impleme
     protected void onResume() {
         super.onResume();
 
-        if(pendingAccountStringCode != null) {
+        if (pendingAccountStringCode != null) {
             addAccountFromStringCode(pendingAccountStringCode);
             pendingAccountStringCode = null;
         }
@@ -123,9 +126,9 @@ public class AccountsManagementActivity extends SherlockFragmentActivity impleme
         boolean result = true;
         switch (item.getItemId()) {
             case R.id.accounts_management_remove:
-                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
-                if(info != null) {
-                    removePool((int)info.id);
+                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+                if (info != null) {
+                    removePool((int) info.id);
                 }
                 break;
             default:
@@ -137,7 +140,7 @@ public class AccountsManagementActivity extends SherlockFragmentActivity impleme
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getSupportMenuInflater().inflate(R.menu.accounts_management, menu);
+        getMenuInflater().inflate(R.menu.accounts_management, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -162,10 +165,10 @@ public class AccountsManagementActivity extends SherlockFragmentActivity impleme
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch(requestCode) {
+        switch (requestCode) {
             case IntentIntegrator.REQUEST_CODE:
                 IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-                if(result != null) {
+                if (result != null) {
                     pendingAccountStringCode = result.getContents();
                 } else {
                     Log.w(TAG, "Don't get result from zxing barcode reader");
@@ -194,18 +197,18 @@ public class AccountsManagementActivity extends SherlockFragmentActivity impleme
 
     private void addAccountFromStringCode(String code) {
         Matcher matcher = Pattern.compile("^\\|(.+)\\|([a-f0-9]+)\\|(\\d+)\\|([^\\|]*)*\\|?$").matcher(code);
-        if(matcher.find()) {
-			String coin = "";
+        if (matcher.find()) {
+            String coin = "";
             String url = matcher.group(1);
             String token = matcher.group(2);
             int userId = Integer.parseInt(matcher.group(3));
 
-			if (matcher.groupCount == 4) {
-				coin = matcher.group(4);
+            if (matcher.groupCount() == 4) {
+                coin = matcher.group(4);
             }
 
-            if(IOUtils.isNetworkAvailable(this, true)) {
-				fragment.addAccount(url, token, userId, coin);
+            if (IOUtils.isNetworkAvailable(this, true)) {
+                fragment.addAccount(url, token, userId, coin);
             }
         } else {
             Toast.makeText(this, R.string.accounts_management_unknown_qr_toast, Toast.LENGTH_SHORT).show();
@@ -235,8 +238,8 @@ public class AccountsManagementActivity extends SherlockFragmentActivity impleme
     @Override
     public void onAccountAddingFinished(AccountAddFragment.Result result) {
         FragmentManager fm = getSupportFragmentManager();
-        ProgressDialogFragment pdf = (ProgressDialogFragment)getSupportFragmentManager().findFragmentByTag(PROGRESS_DIALOG_FRAGMENT_TAG);
-        if(pdf != null) {
+        ProgressDialogFragment pdf = (ProgressDialogFragment) getSupportFragmentManager().findFragmentByTag(PROGRESS_DIALOG_FRAGMENT_TAG);
+        if (pdf != null) {
             fm.beginTransaction().remove(pdf).commitAllowingStateLoss();
         } else {
             Log.w(TAG, "WTF? Progress dialog should be showed.");
@@ -244,7 +247,7 @@ public class AccountsManagementActivity extends SherlockFragmentActivity impleme
 
         refreshAccounts();
 
-        switch(result) {
+        switch (result) {
             case ALREADY_EXISTS:
                 Toast.makeText(this, R.string.accounts_management_account_already_added, Toast.LENGTH_SHORT).show();
                 break;
