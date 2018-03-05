@@ -39,6 +39,7 @@ public class RPC {
 
     private static final String METHOD_ATTR_NAME = "action";
     private static final String TOKEN_ATTR_NAME = "api_key";
+	private static final String COIN_ATTR_NAME = "coin";
 
     /** supported RPC methods */
     public enum Method {
@@ -94,6 +95,7 @@ public class RPC {
 
     private String token;
     private String url;
+	private String coin;
     private final HttpClient httpClient;
     private final Gson gson = new GsonBuilder().create();
 
@@ -116,6 +118,14 @@ public class RPC {
     public void setUrl(String url) {
         this.url = url;
     }
+	
+	public String getCoin() { 
+		return coin; 
+	}
+
+    public void setCoin(String coin) { 
+		this.coin = coin; 
+	}
 
     public RPCResult call(Method method) {
         return call(method, null);
@@ -162,7 +172,12 @@ public class RPC {
             attrs.put(TOKEN_ATTR_NAME, token);
         }
 
-        // put requierd args
+        // put coin if it's provided
+        if (!TextUtils.isEmpty(coin)) {
+            attrs.put(COIN_ATTR_NAME, coin);
+        }
+
+        // put required args
         int i = 0;
         if(method.requiredArgs != null) {
             for(String a : method.requiredArgs) {
